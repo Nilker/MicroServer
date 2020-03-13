@@ -1,0 +1,63 @@
+{
+  "ReRoutes": [
+    {
+      "DownstreamPathTemplate": "/api/{url}",
+      "DownstreamScheme": "http",
+      "UpstreamPathTemplate": "/T/{url}",
+      "UpstreamHttpMethod": [ "Get", "Post" ],
+      "ServiceName": "AbcService",
+      "UseServiceDiscovery": true,
+      "LoadBalancerOptions": {
+        "Type": "RoundRobin" //轮询
+        //"RoundRobin" "-","轮询，挨着来，雨露均沾" 
+        //"LeastConnection","-" "最小连接数，谁的任务最少谁来接客",
+        //"NoLoadBalance" "-","不要负载均衡，让我一个人累死吧"
+      },
+
+      //缓存
+      "FileCacheOptions": {
+        "TtlSeconds": 10
+      },
+
+      //限流
+      "RateLimitOptions": {
+        "ClientWhitelist": [ "admin" ], //白名单
+        "EnableRateLimiting": true, // 是否启用限流
+        "Period": "5m", //1s  5m   1h   1d
+        "PeriodTimespan": 5, //多少秒之后客户端可以重试
+        "Limit": 5 //统计时间段内允许的最大请求数量 
+      },
+
+      //熔断器  Polly 实现：：意思是停止将请求转发到下游服务。当下游服务已经出现故障的时候再请求也是无功而返，并且还会增加下游服务器和API网关的负担
+      "QoSOptions": {
+        "ExceptionsAllowedBeforeBreaking": 2, // 允许多少个异常请求
+        "DurationOfBreak": 5000, // 熔断的时间，单位为毫秒   官方文档中说明的单位是秒，但我在测试中发现应该是毫秒
+        "TimeoutValue": 3000 // 如果下游请求的处理时间超过多少则视如该请求超时
+      },
+
+      "AuthenticationOptions": {
+        "AuthenticationProviderKey": "AbcServiceKey",
+        "AllowedScopes": []
+      }
+
+    }
+  ],
+
+  "GlobalConfiguration": {
+    "BaseUrl": "http://127.0.0.1:6299",
+    "RequestIdKey": null,
+    "ServiceDiscoveryProvider": {
+      "Host": "localhost",
+      "Port": 8500,
+      "Type": "Consul"
+    },
+
+    //限流全剧配置
+    "RateLimitOptions": {
+      "QuotaExceededMessage": "Too mang requests,maybe later?111", //当前请求过载被拦截时返回的消息
+      "HttpStatusCode": 666, //当请求过载被截断时返回  http 状态 
+      "ClientIdHeader": "client_id" // 用来识别客户端的请求头，默认是 ClientId
+    }
+  }
+
+}

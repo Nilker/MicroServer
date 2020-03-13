@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Abc.Interface\Abc.Interface.csproj" />
+    <ProjectReference Include="..\Abc.Model\Abc.Model.csproj" />
+  </ItemGroup>
+
+</Project>
